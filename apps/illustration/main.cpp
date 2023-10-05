@@ -16,7 +16,41 @@
 
 #include <vgc/app/canvasapplication.h>
 
+
+// XXX temporary test
+#include <QSurfaceFormat>
+#include <QtDebug>
+#include <vgc/ui/detail/qopenglengine.h>
+
 int main(int argc, char* argv[]) {
+
+
+    QSurfaceFormat format_;
+    format_.setProfile(QSurfaceFormat::CoreProfile);
+    format_.setVersion(vgc::ui::detail::qopengl::requiredOpenGLVersionMajor, vgc::ui::detail::qopengl::requiredOpenGLVersionMinor);
+    //format_.setOption(QSurfaceFormat::DebugContext);
+
+    // XXX only allow D24_S8 for now..
+    format_.setDepthBufferSize(24);
+    format_.setStencilBufferSize(8);
+    format_.setSamples(32);
+    format_.setSwapInterval(0);
+    //PixelFormat pixelFormat = createInfo.windowSwapChainFormat().pixelFormat();
+    //if (pixelFormat == PixelFormat::RGBA_8_UNORM_SRGB) {
+    format_.setColorSpace(QSurfaceFormat::sRGBColorSpace);
+    //}
+    //else {
+    //    format_.setColorSpace(QSurfaceFormat::DefaultColorSpace);
+    //}
+
+    // XXX use buffer count
+    format_.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(format_);
+
+    QSurfaceFormat format =  QSurfaceFormat::defaultFormat();
+    qDebug() << format;
+
+
     auto application =
         vgc::app::CanvasApplication::create(argc, argv, "VGC Illustration");
     application->setOrganizationName("VGC Software");

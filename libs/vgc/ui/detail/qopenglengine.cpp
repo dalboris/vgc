@@ -29,6 +29,8 @@
 #include <vgc/ui/logcategories.h>
 #include <vgc/ui/qtutil.h>
 
+#include <QtDebug>
+
 namespace vgc::ui::detail::qopengl {
 
 namespace {
@@ -1065,14 +1067,19 @@ void QglEngine::onWindowResize_(SwapChain* aSwapChain, UInt32 /*width*/, UInt32 
 
 void QglEngine::initContext_() {
 
-    //format.setSamples(8); // mandatory, Qt ignores the QWindow format...
+    format_.setSamples(32); // mandatory, Qt ignores the QWindow format...
 
     VGC_CORE_ASSERT(format_.version() >= requiredOpenGLVersionQPair);
 
     if (!isExternalCtx_) {
+        qDebug() << "defaultFormat()" << QSurfaceFormat::defaultFormat();
+        qDebug() << "format_ = " << format_;
         ctx_ = new QOpenGLContext();
+        qDebug() << "ctx_->format() after creation = " << ctx_->format();
         ctx_->setFormat(format_);
+        qDebug() << "ctx_->format() after setFormat() = " << ctx_->format();
         [[maybe_unused]] bool ok = ctx_->create();
+        qDebug() << "ctx_->format() after create() = " << ctx_->format();
         VGC_CORE_ASSERT(ok);
     }
     VGC_CORE_ASSERT(ctx_->isValid());

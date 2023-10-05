@@ -129,6 +129,7 @@ Window::Window(CreateKey key, const WidgetPtr& widget)
     , widget_(widget)
     , proj_(geometry::Mat4f::identity) {
 
+
     connect((QWindow*)this, &QWindow::activeChanged, this, &Window::onActiveChanged_);
 
     //setMouseTracking(true);
@@ -1034,7 +1035,7 @@ void Window::initEngine_() {
     graphics::WindowSwapChainFormat& windowSwapChainFormat =
         engineCreateInfo.windowSwapChainFormat();
     windowSwapChainFormat.setNumBuffers(2);
-    windowSwapChainFormat.setNumSamples(8);
+    windowSwapChainFormat.setNumSamples(32);
 
 #if defined(VGC_CORE_OS_MACOS)
     engineCreateInfo.setMultithreadingEnabled(false);
@@ -1112,6 +1113,30 @@ void Window::initEngine_() {
     std::string classNameA(classNameW.begin(), classNameW.end());
     //VGC_INFO(LogVgcUi, "Window class name: {}", classNameA);
 #else
+    // XXX Currently, we do QSurfaceFormat::setDefaultFormat() here (indirect
+    // call from creating the engine), but this is too late! We need to
+    // do it before creating the window.
+    // Ok, I didn't manage to get 32 samples. I should try on a minimal example:
+    // https://doc.qt.io/qt-6/qtopengl-openglwindow-example.html.
+    // The order seems to be:
+    // int main(int argc, char **argv)
+    // {
+    //     QGuiApplication app(argc, argv); // Create the app
+    //
+    //     QSurfaceFormat format;
+    //     format.setSamples(16);
+    //
+    //     TriangleWindow window;
+    //     window.setFormat(format); // specify the format
+    //     window.resize(640, 480);
+    //     window.show();
+    //
+    //     window.setAnimating(true);
+    //
+    //     return app.exec(); // somewhere in there, there is a new QOpenGLContext(&window).
+    // }
+    setFormat(QSurfaceFormat::defaultFormat());
+    QWindow::create();
     engine_ = detail::QglEngine::create(engineCreateInfo);
     swapChainCreateInfo.setWindowNativeHandle(
         static_cast<QWindow*>(this), graphics::WindowNativeHandleType::QOpenGLWindow);
